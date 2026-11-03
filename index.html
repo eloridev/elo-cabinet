@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Личный кабинет ELØ</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --bg: var(--tg-theme-secondary-bg-color, #f2f2f6);
+    --card: var(--tg-theme-section-bg-color, var(--tg-theme-bg-color, #ffffff));
+    --text: var(--tg-theme-text-color, #16161a);
+    --hint: var(--tg-theme-hint-color, #80808c);
+    --accent: var(--tg-theme-button-color, #7b5cff);
+    --on-accent: var(--tg-theme-button-text-color, #ffffff);
+    --line: color-mix(in srgb, var(--hint) 28%, transparent);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-tg]) {
+      --bg: #101014; --card: #1b1b21; --text: #f2f2f6; --hint: #8e8e9a; --accent: #9a82ff;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; padding: 20px 16px 40px; background: var(--bg); color: var(--text);
+    font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  main { max-width: 520px; margin: 0 auto; }
+  header { padding: 4px 4px 16px; }
+  h1 { margin: 0; font-size: 24px; line-height: 1.2; }
+  header p { margin: 4px 0 0; color: var(--hint); font-size: 15px; }
+  section { margin-bottom: 20px; }
+  h2 { margin: 0 4px 8px; font-size: 13px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--hint); }
+  .card { background: var(--card); border-radius: 14px; padding: 14px; }
+  .field + .field { margin-top: 16px; }
+  label, .label { display: block; margin-bottom: 6px; font-size: 15px; font-weight: 500; }
+  input[type=text], textarea {
+    width: 100%; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px;
+    background: transparent; color: var(--text); font: inherit;
+  }
+  input[type=text]:focus, textarea:focus { outline: 2px solid var(--accent); outline-offset: -1px; border-color: transparent; }
+  input + input { margin-top: 8px; }
+  textarea { min-height: 96px; resize: vertical; }
+  ::placeholder { color: var(--hint); opacity: .75; }
+  .hint { margin: 6px 0 0; color: var(--hint); font-size: 13px; }
+  .count { float: right; font-variant-numeric: tabular-nums; }
+  .preview { margin-top: 8px; padding: 8px 10px; border-radius: 8px; background: color-mix(in srgb, var(--accent) 12%, transparent);
+             font-size: 14px; overflow-wrap: anywhere; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips button {
+    min-height: 40px; padding: 8px 14px; border: 1px solid var(--line); border-radius: 20px;
+    background: transparent; color: var(--text); font: inherit; font-size: 15px; cursor: pointer;
+  }
+  .chips button[aria-pressed=true] { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .chips button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  #outside { display: none; margin-bottom: 16px; padding: 12px 14px; border-radius: 12px; background: var(--card); font-size: 15px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Личный кабинет</h1>
+    <p>Студия ELØ · карточка артиста</p>
+  </header>
+  <div id="outside">Эта страница работает внутри бота. Открой её кнопкой «👤 Личный кабинет» в меню бота, иначе изменения не сохранятся.</div>
+
+  <section>
+    <h2>Артист</h2>
+    <div class="card">
+      <div class="field">
+        <label for="alias">Творческий псевдоним</label>
+        <input type="text" id="alias" maxlength="60" autocomplete="off">
+        <div class="preview" id="preview"></div>
+        <p class="hint">Так будут называться готовые файлы. Он же попадёт в теги как исполнитель.</p>
+      </div>
+      <div class="field">
+        <label for="short_name">Короткое имя для общения</label>
+        <input type="text" id="short_name" maxlength="30" autocomplete="off">
+      </div>
+      <div class="field">
+        <span class="label">Как к тебе обращаться</span>
+        <div class="chips" data-field="gender" data-options="f:В женском роде|m:В мужском роде"></div>
+      </div>
+      <div class="field">
+        <span class="label">Кем ты являешься</span>
+        <div class="chips" data-field="role" data-options="lyrics:Автор слов|music:Автор музыки|both:И слов, и музыки"></div>
+        <p class="hint">Попадёт в теги как автор текста и композитор.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Твой звук</h2>
+    <div class="card">
+      <div class="field">
+        <label for="genre">Жанр</label>
+        <input type="text" id="genre" maxlength="60" placeholder="Например, dance-pop" autocomplete="off">
+        <p class="hint">Попадёт в теги и поможет при сведении.</p>
+      </div>
+      <div class="field">
+        <label for="ref1">Любимые референсы</label>
+        <input type="text" id="ref1" maxlength="80" placeholder="Исполнитель — Песня" autocomplete="off">
+        <input type="text" id="ref2" maxlength="80" placeholder="Исполнитель — Песня" autocomplete="off">
+        <input type="text" id="ref3" maxlength="80" placeholder="Исполнитель — Песня" autocomplete="off">
+        <p class="hint">Это только названия, ориентир по вкусу. Точный референс для песни по-прежнему лучше прислать файлом в проект.</p>
+      </div>
+      <div class="field">
+        <label for="taste">Что для тебя всегда важно в миксе <span class="count" id="taste_count"></span></label>
+        <textarea id="taste" maxlength="300" placeholder="Например: голос всегда впереди, широкое стерео, плотные барабаны"></textarea>
+        <p class="hint">Я учту это в каждом проекте. Если в ТЗ песни написано иначе, главным будет ТЗ.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Новый проект по умолчанию</h2>
+    <div class="card">
+      <div class="field">
+        <span class="label">Режим</span>
+        <div class="chips" data-field="mode" data-options=":По числу файлов|mix:Сведение + мастер|master:Только мастеринг"></div>
+      </div>
+      <div class="field">
+        <span class="label">Громкость</span>
+        <div class="chips" data-field="loud" data-options="stream:Стриминг −14|std:Мягче −9|loud:Радио −7"></div>
+        <p class="hint">В каждом проекте можно поменять перед запуском.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Для тегов</h2>
+    <div class="card">
+      <div class="field">
+        <label for="label">Лейбл или правообладатель</label>
+        <input type="text" id="label" maxlength="60" autocomplete="off">
+        <p class="hint">Необязательно. Год я подставлю в теги сама.</p>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+(function () {
+  var tg = window.Telegram && Telegram.WebApp;
+  var inTelegram = !!(tg && tg.initData);
+  var TEXT = ["alias", "short_name", "genre", "taste", "label"];
+  var REFS = ["ref1", "ref2", "ref3"];
+  var choice = {};
+
+  // The card comes in the address after #, which the browser never sends to the hosting.
+  function readCard() {
+    var params = (window.Telegram && Telegram.WebView && Telegram.WebView.initParams) || {};
+    var raw = params.card;
+    if (!raw) {
+      var m = /[#&]card=([^&]*)/.exec(location.hash);
+      raw = m && m[1];
+    }
+    if (!raw) return null;
+    try {
+      var b64 = raw.replace(/-/g, "+").replace(/_/g, "/");
+      var bytes = Uint8Array.from(atob(b64), function (ch) { return ch.charCodeAt(0); });
+      return JSON.parse(new TextDecoder().decode(bytes));
+    } catch (e) {
+      return null;
+    }
+  }
+
+  var card = readCard();
+  var known = !!card;
+  card = card || {};
+
+  TEXT.forEach(function (id) { document.getElementById(id).value = card[id] || ""; });
+  REFS.forEach(function (id, i) { document.getElementById(id).value = (card.refs || [])[i] || ""; });
+
+  function touched() {
+    if (inTelegram && tg.isVersionAtLeast("6.2")) tg.enableClosingConfirmation();
+  }
+
+  document.querySelectorAll(".chips").forEach(function (box) {
+    var field = box.dataset.field;
+    choice[field] = card[field] || "";
+    box.dataset.options.split("|").forEach(function (opt) {
+      var at = opt.indexOf(":"), value = opt.slice(0, at);
+      var b = document.createElement("button");
+      b.type = "button";
+      b.textContent = opt.slice(at + 1);
+      b.dataset.value = value;
+      b.addEventListener("click", function () {
+        choice[field] = (choice[field] === value) ? "" : value;     // a second tap clears the choice
+        paint(box, field);
+        touched();
+      });
+      box.appendChild(b);
+    });
+    paint(box, field);
+  });
+
+  function paint(box, field) {
+    box.querySelectorAll("button").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.dataset.value === choice[field]));
+    });
+  }
+
+  function refresh() {
+    var alias = document.getElementById("alias").value.trim();
+    document.getElementById("preview").textContent = (alias ? alias + " - " : "") + "Песня v1.mp3";
+    var left = 300 - document.getElementById("taste").value.length;
+    document.getElementById("taste_count").textContent = left < 60 ? String(left) : "";
+  }
+  document.querySelectorAll("input, textarea").forEach(function (el) {
+    el.addEventListener("input", function () { refresh(); touched(); });
+  });
+  refresh();
+
+  function collect() {
+    var out = { v: 1, known: known };
+    TEXT.forEach(function (id) { out[id] = document.getElementById(id).value.trim(); });
+    out.refs = REFS.map(function (id) { return document.getElementById(id).value.trim(); })
+                   .filter(function (x) { return x; });
+    Object.keys(choice).forEach(function (k) { out[k] = choice[k]; });
+    return out;
+  }
+
+  function save() {
+    if (tg.isVersionAtLeast("6.2")) tg.disableClosingConfirmation();
+    tg.sendData(JSON.stringify(collect()));     // Telegram closes the window and hands the data to the bot
+  }
+
+  if (inTelegram) {
+    document.documentElement.setAttribute("data-tg", "");
+    tg.ready();
+    tg.expand();
+    if (tg.isVersionAtLeast("7.7")) tg.disableVerticalSwipes();
+    tg.MainButton.setText("Сохранить");
+    tg.MainButton.onClick(save);
+    tg.MainButton.show();
+  } else {
+    document.getElementById("outside").style.display = "block";
+  }
+})();
+</script>
+</body>
+</html>
